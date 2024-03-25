@@ -10,4 +10,4 @@ echo "V0lORE9XU19USVRMRT1gZ3JlcCAtaSAnd2luZG93cycgL2Jvb3QvZ3J1Yi9ncnViLmNmZ3xjdX
 
 chmod +x ~/.reboot2win.sh
 
-gnome-extensions install Reboot2Windows@coooolfan.com.shell-extension.zip --force
+gnome-extensions install Reboot2Windows@coooolfan.com.shell-extension.zip 

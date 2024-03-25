@@ -143,19 +143,19 @@ export default class Reboot2WinExtension extends Extension {
     const titleBox = new St.BoxLayout({
       x_align: Clutter.ActorAlign.CENTER,
     });
-    titleBox.add(new St.Label({ text: '  ' }));
-    titleBox.add(dialogTitle);
+    titleBox.add_child(new St.Label({ text: '  ' }));
+    titleBox.add_child(dialogTitle);
 
     let box = new St.BoxLayout({ y_expand: true, vertical: true });
-    box.add(titleBox);
-    box.add(new St.Label({ text: '  ' }));
-    box.add(dialogMessage);
+    box.add_child(titleBox);
+    box.add_child(new St.Label({ text: '  ' }));
+    box.add_child(dialogMessage);
 
     this.messageIntervalId = setInterval(() => {
       dialogMessage?.set_text(this._getDialogMessageText());
     }, 500);
 
-    dialog.contentLayout.add(box);
+    dialog.contentLayout.add_child(box);
 
     return dialog;
   }
