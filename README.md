@@ -48,6 +48,7 @@ A: When you run the installation script (install.sh), the plugin will generate a
 
 A: Gnome may have all extensions disabled by default. Please find "Extensions" in your application library, enable extension functionality, and enable the "reboot2win" extension.
 
+# 安装
 
 ### 下载插件
 从GitHub克隆该存储库。

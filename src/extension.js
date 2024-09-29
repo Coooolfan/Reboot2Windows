@@ -27,147 +27,147 @@ import { Extension, gettext as _ } from 'resource:///org/gnome/shell/extensions/
 
 
 export default class Reboot2WinExtension extends Extension {
-  menu;
-  reboot2WinItem;
-  /** @type {number} */
-  counter;
-  /** @type {number} */
-  seconds;
-  /** @type {number} */
-  counterIntervalId;
-  /** @type {number} */
-  messageIntervalId;
-  sourceId;
+    menu;
+    reboot2WinItem;
+    /** @type {number} */
+    counter;
+    /** @type {number} */
+    seconds;
+    /** @type {number} */
+    counterIntervalId;
+    /** @type {number} */
+    messageIntervalId;
+    sourceId;
 
-  _modifySystemItem() {
-    this.menu = panel.statusArea.quickSettings._system?.quickSettingsItems[0].menu;
+    _modifySystemItem() {
+        this.menu = panel.statusArea.quickSettings._system?.quickSettingsItems[0].menu;
 
 
-    this.reboot2WinItem = new PopupMenu.PopupMenuItem(`${_('Reboot2Win')}...`);
+        this.reboot2WinItem = new PopupMenu.PopupMenuItem(`${_('Reboot2Win')}...`);
 
-    this.reboot2WinItem.connect('activate', () => {
-      this.counter = 3;
-      this.seconds = this.counter;
+        this.reboot2WinItem.connect('activate', () => {
+            this.counter = 3;
+            this.seconds = this.counter;
 
-      const dialog = this._buildDialog();
-      dialog.open();
+            const dialog = this._buildDialog();
+            dialog.open();
 
-      this.counterIntervalId = setInterval(() => {
-        if (this.counter > 0) {
-          this.counter--;
-          this.seconds = this.counter;
+            this.counterIntervalId = setInterval(() => {
+                if (this.counter > 0) {
+                    this.counter--;
+                    this.seconds = this.counter;
 
+                } else {
+                    this._clearIntervals();
+                    this._reboot();
+                }
+            }, 500);
+
+        });
+
+        this.menu.addMenuItem(this.reboot2WinItem, 2);
+    }
+
+    _queueModifySystemItem() {
+        this.sourceId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+            if (!panel.statusArea.quickSettings._system)
+                return GLib.SOURCE_CONTINUE;
+
+            this._modifySystemItem();
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    constructor(metadata) {
+        super(metadata);
+    }
+
+    enable() {
+        if (!panel.statusArea.quickSettings._system) {
+            this._queueModifySystemItem();
         } else {
-          this._clearIntervals();
-          this._reboot();
+            this._modifySystemItem();
         }
-      }, 500);
-
-    });
-
-    this.menu.addMenuItem(this.reboot2WinItem, 2);
-  }
-
-  _queueModifySystemItem() {
-    this.sourceId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-      if (!panel.statusArea.quickSettings._system)
-        return GLib.SOURCE_CONTINUE;
-
-      this._modifySystemItem();
-      return GLib.SOURCE_REMOVE;
-    });
-  }
-
-  constructor(metadata) {
-    super(metadata);
-  }
-
-  enable() {
-    if (!panel.statusArea.quickSettings._system) {
-      this._queueModifySystemItem();
-    } else {
-      this._modifySystemItem();
     }
-  }
 
-  disable() {
-    this._clearIntervals();
-    this.reboot2WinItem?.destroy();
-    this.reboot2WinItem = null;
-    if (this.sourceId) {
-      GLib.Source.remove(this.sourceId);
-      this.sourceId = null;
+    disable() {
+        this._clearIntervals();
+        this.reboot2WinItem?.destroy();
+        this.reboot2WinItem = null;
+        if (this.sourceId) {
+            GLib.Source.remove(this.sourceId);
+            this.sourceId = null;
+        }
     }
-  }
 
-  async _reboot() {
-    const username = GLib.get_user_name();
-    const script_path = '/home/' + username + '/.reboot2win.sh';
-    execCheck(['pkexec', 'sh', script_path]).catch((e) => {console.log(e);});
+    async _reboot() {
+        const username = GLib.get_user_name();
+        const script_path = '/home/' + username + '/.reboot2win.sh';
+        execCheck(['pkexec', 'sh', script_path]).catch((e) => { console.log(e); });
 
-  }
+    }
 
-  _buildDialog() {
-    const dialog = new ModalDialog.ModalDialog({ styleClass: "modal-dialog" });
-    dialog.setButtons([
-      {
-        label: _("Cancel"),
-        action: () => {
-          this._clearIntervals();
-          dialog.close();
-        },
-        key: Clutter.KEY_Escape,
-        default: false,
-      },
-      {
-        label: _("Reboot"),
-        action: () => {
-          this._clearIntervals();
-          this._reboot();
-        },
-        default: false,
-      },
-    ]);
+    _buildDialog() {
+        const dialog = new ModalDialog.ModalDialog({ styleClass: "modal-dialog" });
+        dialog.setButtons([
+            {
+                label: _("Cancel"),
+                action: () => {
+                    this._clearIntervals();
+                    dialog.close();
+                },
+                key: Clutter.KEY_Escape,
+                default: false,
+            },
+            {
+                label: _("Reboot"),
+                action: () => {
+                    this._clearIntervals();
+                    this._reboot();
+                },
+                default: false,
+            },
+        ]);
 
-    const dialogTitle = new St.Label({
-      text: _('Reboot to Windows'),
-      style: "font-weight: bold;font-size:18px"
-    });
+        const dialogTitle = new St.Label({
+            text: _('Reboot to Windows'),
+            style: "font-weight: bold;font-size:18px"
+        });
 
-    let dialogMessage = new St.Label({
-      text: this._getDialogMessageText(),
-    });
-    dialogMessage.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
-    dialogMessage.clutter_text.line_wrap = true;
+        let dialogMessage = new St.Label({
+            text: this._getDialogMessageText(),
+        });
+        dialogMessage.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
+        dialogMessage.clutter_text.line_wrap = true;
 
-    const titleBox = new St.BoxLayout({
-      x_align: Clutter.ActorAlign.CENTER,
-    });
-    titleBox.add_child(new St.Label({ text: '  ' }));
-    titleBox.add_child(dialogTitle);
+        const titleBox = new St.BoxLayout({
+            x_align: Clutter.ActorAlign.CENTER,
+        });
+        titleBox.add_child(new St.Label({ text: '  ' }));
+        titleBox.add_child(dialogTitle);
 
-    let box = new St.BoxLayout({ y_expand: true, vertical: true });
-    box.add_child(titleBox);
-    box.add_child(new St.Label({ text: '  ' }));
-    box.add_child(dialogMessage);
+        let box = new St.BoxLayout({ y_expand: true, vertical: true });
+        box.add_child(titleBox);
+        box.add_child(new St.Label({ text: '  ' }));
+        box.add_child(dialogMessage);
 
-    this.messageIntervalId = setInterval(() => {
-      dialogMessage?.set_text(this._getDialogMessageText());
-    }, 500);
+        this.messageIntervalId = setInterval(() => {
+            dialogMessage?.set_text(this._getDialogMessageText());
+        }, 500);
 
-    dialog.contentLayout.add_child(box);
+        dialog.contentLayout.add_child(box);
 
-    return dialog;
-  }
+        return dialog;
+    }
 
-  _getDialogMessageText() {
-    return _(`The system will restart to Windows in %d seconds. .`).replace('%d', this.seconds);
-  }
+    _getDialogMessageText() {
+        return _(`The system will restart to Windows in %d seconds. .`).replace('%d', this.seconds);
+    }
 
-  _clearIntervals() {
-    clearInterval(this.counterIntervalId);
-    clearInterval(this.messageIntervalId);
-  }
+    _clearIntervals() {
+        clearInterval(this.counterIntervalId);
+        clearInterval(this.messageIntervalId);
+    }
 
 }
 
@@ -184,37 +184,37 @@ export default class Reboot2WinExtension extends Extension {
  * @returns {Promise<string>} - The process output
  */
 async function execCommunicate(argv, input = null, cancellable = null) {
-  let cancelId = 0;
-  let flags = Gio.SubprocessFlags.STDOUT_PIPE |
-    Gio.SubprocessFlags.STDERR_PIPE;
+    let cancelId = 0;
+    let flags = Gio.SubprocessFlags.STDOUT_PIPE |
+        Gio.SubprocessFlags.STDERR_PIPE;
 
-  if (input !== null)
-    flags |= Gio.SubprocessFlags.STDIN_PIPE;
+    if (input !== null)
+        flags |= Gio.SubprocessFlags.STDIN_PIPE;
 
-  const proc = new Gio.Subprocess({ argv, flags });
-  proc.init(cancellable);
+    const proc = new Gio.Subprocess({ argv, flags });
+    proc.init(cancellable);
 
-  if (cancellable instanceof Gio.Cancellable)
-    cancelId = cancellable.connect(() => proc.force_exit());
+    if (cancellable instanceof Gio.Cancellable)
+        cancelId = cancellable.connect(() => proc.force_exit());
 
-  try {
-    const [stdout, stderr] = await proc.communicate_utf8_async(input, null);
+    try {
+        const [stdout, stderr] = await proc.communicate_utf8_async(input, null);
 
-    const status = proc.get_exit_status();
+        const status = proc.get_exit_status();
 
-    if (status !== 0) {
-      console.log(`Command '${argv}' failed with exit code ${status}`);
-      throw new Gio.IOErrorEnum({
-        code: Gio.IOErrorEnum.FAILED,
-        message: stderr ? stderr.trim() : `Command '${argv}' failed with exit code ${status}`,
-      });
+        if (status !== 0) {
+            console.log(`Command '${argv}' failed with exit code ${status}`);
+            throw new Gio.IOErrorEnum({
+                code: Gio.IOErrorEnum.FAILED,
+                message: stderr ? stderr.trim() : `Command '${argv}' failed with exit code ${status}`,
+            });
+        }
+
+        return stdout.trim();
+    } finally {
+        if (cancelId > 0)
+            cancellable.disconnect(cancelId);
     }
-
-    return stdout.trim();
-  } finally {
-    if (cancelId > 0)
-      cancellable.disconnect(cancelId);
-  }
 }
 
 
@@ -228,29 +228,29 @@ async function execCommunicate(argv, input = null, cancellable = null) {
  * @returns {Promise<boolean>} - The process success
  */
 async function execCheck(argv, cancellable = null) {
-  let cancelId = 0;
-  const proc = new Gio.Subprocess({
-    argv,
-    flags: Gio.SubprocessFlags.NONE,
-  });
-  proc.init(cancellable);
+    let cancelId = 0;
+    const proc = new Gio.Subprocess({
+        argv,
+        flags: Gio.SubprocessFlags.NONE,
+    });
+    proc.init(cancellable);
 
-  if (cancellable instanceof Gio.Cancellable)
-    cancelId = cancellable.connect(() => proc.force_exit());
+    if (cancellable instanceof Gio.Cancellable)
+        cancelId = cancellable.connect(() => proc.force_exit());
 
-  try {
-    const success = await proc.wait_check_async(null);
+    try {
+        const success = await proc.wait_check_async(null);
 
-    if (!success) {
-      const status = proc.get_exit_status();
+        if (!success) {
+            const status = proc.get_exit_status();
 
-      throw new Gio.IOErrorEnum({
-        code: Gio.IOErrorEnum.FAILED,
-        message: `Command '${argv}' failed with exit code ${status}`,
-      });
+            throw new Gio.IOErrorEnum({
+                code: Gio.IOErrorEnum.FAILED,
+                message: `Command '${argv}' failed with exit code ${status}`,
+            });
+        }
+    } finally {
+        if (cancelId > 0)
+            cancellable.disconnect(cancelId);
     }
-  } finally {
-    if (cancelId > 0)
-      cancellable.disconnect(cancelId);
-  }
 }

@@ -1,12 +1,13 @@
 {
-  "name": "Reboot2Windows",
-  "description": "Reboot system into Windows",
-  "license": "GPLv3",
-  "uuid": "Reboot2Windows@coooolfan.com",
-  "url": "https://github.com/Coooolfan/Reboot2Windows",
-  "version": "1.1",
-  "shell-version": [
-    "46"
-  ],
-  "gettext-domain": "Reboot2Windows@coooolfan.com"
+    "name": "Reboot2Windows",
+    "description": "Reboot system into Windows",
+    "license": "GPLv3",
+    "uuid": "Reboot2Windows@coooolfan.com",
+    "url": "https://github.com/Coooolfan/Reboot2Windows",
+    "version": "1.2",
+    "shell-version": [
+        "46",
+        "47"
+    ],
+    "gettext-domain": "Reboot2Windows@coooolfan.com"
 }
