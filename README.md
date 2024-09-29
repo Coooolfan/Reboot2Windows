@@ -1,89 +1,56 @@
-# Reboot to Windows / 重启到Windows
+# Reboot to Windows / 一键重启到Windows
 
-This is a small Gnome extension that adds the ability to reboot directly to the Windows when using grub.
+This is a small Gnome extension that adds the ability to reboot directly to the Windows when using grub. support Chinese and English.
 
-此Gnome扩展允许您从重启菜单中一键重启到Windows。
+此Gnome扩展允许您从重启菜单中一键重启到Windows。支持中文和英文。
+
+> [!NOTE]
+>
+> This project has only been tested on Arch Linux, but should work with all Linux distributions that use grub.
+> If you encounter any issues while using it, please feel free to contact me. I am more than happy to help you troubleshoot.
+>
+> 此项目仅在Arch Linux上进行了测试，但应该适用于所有使用grub的Linux发行版。
+> 如果您在使用中遇到任何问题，请随时联系我。很乐意帮助您解决问题。
 
 ![Screenshot of the extension option in the Gnome 45.1 menu](images/screenshot.png)
 
 
-# 警告
+#### Q： I installed the plugin, but the menu is not appearing. What should I do? / 我安装了插件后没有出现该菜单？
 
-**此插件不在Gnome扩展站点上提供！**
+A：Gnome may have all extensions disabled by default. Please find "Extensions" in your application library, enable extension functionality, and enable the "reboot2win" extension.
 
-#### Q：为什么此插件不在Gnome扩展商店提供？
+Gnome可能默认关闭了所有扩展，请在你的程序库中找到`扩展`启用扩展功能，并启用reboot2win扩展。
 
-A：此插件不符合Gnome扩展开发规范，其调用了本地的脚本文件实现。
+# Installation / 安装
 
-#### Q：为什么不按照开发规范开发此插件？
+> [!NOTE]
+>
+> 此插件已提交到Gnome官方扩展商店审核～
 
-A：很抱歉，在过去的3天中，我尝试了所有我能尝试的方法来将脚本文件嵌入到`extension.js`文件中，但是最终都以失败告终。其中包括但不限于：大量的转义字符，缺乏subprocesses函数相关的文档。
-如果您有相关开发经验，能为此插件制作满足开发规范的版本，感激不尽。
+### Download / 下载插件
 
-#### Q：现在插件是如何实现的？
-
-A：插件会在您执行安装脚本（`install.sh`）时在用户目录下生成一个shell程序，此后当您执行此插件时，该脚本会被调用。
-
-#### Q：我安装了插件后没有出现该菜单？
-
-A：Gnome可能默认关闭了所有扩展，请在你的程序库中找到`扩展`启用扩展功能，并启用reboot2win扩展。
-
-
-# Warning
-**This plugin is not available on the Gnome Extensions website!**
-
-#### Q: Why is this plugin not available on the Gnome Extensions store?
-
-A: This plugin does not comply with the Gnome Extensions development guidelines as it calls local script files.
-
-#### Q: Why wasn't this plugin developed according to the guidelines?
-
-A: I apologize, but over the past three days, I have tried every method I could think of to embed the script file into the extension.js file, but all attempts have failed. This includes, but is not limited to, extensive use of escape characters and a lack of documentation on subprocess functions. If you have relevant development experience and can create a version of this plugin that meets the development guidelines, I would greatly appreciate it.
-
-#### Q: How is the plugin currently implemented?
-
-A: When you run the installation script (install.sh), the plugin will generate a shell program in your user directory. Subsequently, when you execute the plugin, that script will be invoked.
-
-#### Q: I installed the plugin, but the menu is not appearing. What should I do?
-
-A: Gnome may have all extensions disabled by default. Please find "Extensions" in your application library, enable extension functionality, and enable the "reboot2win" extension.
-
-# 安装
-
-### 下载插件
+You can clone the project from GitHub. 
 从GitHub克隆该存储库。
 
 `$ git clone https://github.com/Coooolfan/Reboot2Windows`
 
-### 构建插件
+### Build / 构建插件
+
+If you want to build the plugin, run the following command:
+
 要构建插件，请运行以下命令：
 
 `$ sh build.sh`
 
+If everything goes well, a zip file will be generated in the project folder.
+
 如果一切顺利，这将在项目文件夹中生成一个zip文件。
 
-### 安装插件
+### Install / 安装插件
+
+To install the plugin, simply run the install.sh script with the following command:
+
 要安装插件，只需运行install.sh脚本，并使用以下命令：
-
-`$ sh install.sh`
-
-### Download the extension
-
-clone this repository from github.
-
-`$ git clone https://github.com/Coooolfan/Reboot2Windows`
-
-### Build the extension
-
-To build the extension run the following command:
-
-`$ sh build.sh`
-
-If all goes well this will generate a zip file in the project folder.
-
-### Install the extension
-
-To install the extension just run the **install.sh** script with the following command:
 
 `$ sh install.sh`
 
@@ -97,3 +64,6 @@ Special thanks to the author of reboottouefi for open-sourcing the plugin at [re
 
 I would also like to express my gratitude to the friends within the archlinuxcn community who have generously contributed their time, helping me troubleshoot various issues during the plugin development process.
 
+# for Developer
+
+<https://gjs.guide/extensions/#introduction> 
