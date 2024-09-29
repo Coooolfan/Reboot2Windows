@@ -32,8 +32,6 @@ export default class Reboot2WinExtension extends Extension {
     /** @type {number} */
     counter;
     /** @type {number} */
-    seconds;
-    /** @type {number} */
     counterIntervalId;
     /** @type {number} */
     messageIntervalId;
@@ -46,8 +44,7 @@ export default class Reboot2WinExtension extends Extension {
         this.reboot2WinItem = new PopupMenu.PopupMenuItem(`${_('Reboot2Win')}...`);
 
         this.reboot2WinItem.connect('activate', () => {
-            this.counter = 3;
-            this.seconds = this.counter;
+            this.counter = 5;
 
             const dialog = this._buildDialog();
             dialog.open();
@@ -55,17 +52,38 @@ export default class Reboot2WinExtension extends Extension {
             this.counterIntervalId = setInterval(() => {
                 if (this.counter > 0) {
                     this.counter--;
-                    this.seconds = this.counter;
 
                 } else {
                     this._clearIntervals();
                     this._reboot();
                 }
-            }, 500);
+            }, 1000);
 
         });
 
         this.menu.addMenuItem(this.reboot2WinItem, 2);
+    }
+
+    async _reboot() {
+        const catGrubCfgSh = [
+            'sh', '-c',
+            'cat /boot/grub/grub.cfg'
+        ];
+
+        try {
+            const result = await execCommunicate(catGrubCfgSh);
+            const windowsTitle = _getWindowsTitle(result);
+            if (!windowsTitle) return;
+            const grubRebootSh = [
+                'pkexec', 'sh',
+                '-c', `grub-reboot "${windowsTitle}" && reboot`
+            ]
+            execCheck(grubRebootSh).catch((e) => { console.log(e); });
+        } catch (error) {
+            console.log(error);
+        }
+
+
     }
 
     _queueModifySystemItem() {
@@ -98,13 +116,6 @@ export default class Reboot2WinExtension extends Extension {
             GLib.Source.remove(this.sourceId);
             this.sourceId = null;
         }
-    }
-
-    async _reboot() {
-        const username = GLib.get_user_name();
-        const script_path = '/home/' + username + '/.reboot2win.sh';
-        execCheck(['pkexec', 'sh', script_path]).catch((e) => { console.log(e); });
-
     }
 
     _buildDialog() {
@@ -161,7 +172,7 @@ export default class Reboot2WinExtension extends Extension {
     }
 
     _getDialogMessageText() {
-        return _(`The system will restart to Windows in %d seconds. .`).replace('%d', this.seconds);
+        return _(`The system will restart to Windows in %d seconds. .`).replace('%d', this.counter);
     }
 
     _clearIntervals() {
@@ -169,6 +180,27 @@ export default class Reboot2WinExtension extends Extension {
         clearInterval(this.messageIntervalId);
     }
 
+}
+
+function _getWindowsTitle(grubConfig) {
+    // 将输入字符串按行分割
+    const lines = grubConfig.split('\n');
+
+    // 查找包含 'windows' 的行（不区分大小写）
+    const windowsLine = lines.find(line =>
+        line.toLowerCase().includes('windows')
+    );
+
+    if (!windowsLine) {
+        return null; // 如果没有找到包含 'windows' 的行，返回 null
+    }
+
+    // 使用正则表达式提取单引号中的内容
+    const match = windowsLine.match(/'([^']+)'/);
+
+    // 如果找到匹配，返回第一个捕获组（单引号中的内容）
+    // 否则返回 null
+    return match ? match[1] : null;
 }
 
 /**
@@ -198,15 +230,13 @@ async function execCommunicate(argv, input = null, cancellable = null) {
         cancelId = cancellable.connect(() => proc.force_exit());
 
     try {
-        const [stdout, stderr] = await proc.communicate_utf8_async(input, null);
+        const [ok, stdout, stderr] = await proc.communicate_utf8(input, null);
 
-        const status = proc.get_exit_status();
-
-        if (status !== 0) {
-            console.log(`Command '${argv}' failed with exit code ${status}`);
+        if (!ok) {
+            console.log(`Command '${argv}' failed with stderr ${stderr}`);
             throw new Gio.IOErrorEnum({
                 code: Gio.IOErrorEnum.FAILED,
-                message: stderr ? stderr.trim() : `Command '${argv}' failed with exit code ${status}`,
+                message: stderr ? stderr.trim() : `Command '${argv}' failed with stderr ${stderr}`,
             });
         }
 
