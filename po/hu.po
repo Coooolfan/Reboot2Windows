@@ -1,0 +1,39 @@
+# Hungarian translation for Reboot2Windows.
+# Copyright (C) 2023 Reboot2Windows
+# This file is distributed under the same license as the Reboot2Windows package.
+# ViBE <vibe@protonmail.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Reboot2Windows\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-29 22:15+0800\n"
+"PO-Revision-Date: 2024-10-01 17:23+0200\n"
+"Last-Translator: ViBE <vibe@protonmail.com>\n"
+"Language-Team: Hungarian <vibe@protonmail.com>\n"
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: extension.js:46
+msgid "Reboot2Win"
+msgstr "Reboot2Win"
+
+#: extension.js:114
+msgid "Cancel"
+msgstr "Mégse"
+
+#: extension.js:123
+msgid "Reboot"
+msgstr "Újraindítás"
+
+#: extension.js:133
+msgid "Reboot to Windows"
+msgstr "Újraindítás Windows-ban"
+
+#: extension.js:164
+#, javascript-format
+msgid "The system will restart to Windows in %d seconds."
+msgstr "A rendszer automatikusan újraindul %d másodperc múlva."
