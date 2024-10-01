@@ -65,14 +65,14 @@ export default class Reboot2WinExtension extends Extension {
     }
 
     async _reboot() {
-        const catGrubCfgSh = [
-            'sh', '-c',
-            'cat /boot/grub/grub.cfg'
-        ];
 
         try {
-            const result = await execCommunicate(catGrubCfgSh);
-            const windowsTitle = _getWindowsTitle(result);
+            const file = Gio.File.new_for_path('/boot/grub/grub.cfg');
+            const [_, contents, etag] = await file.load_contents(null);
+            const decoder = new TextDecoder('utf-8');
+            const contentsString = decoder.decode(contents);
+
+            const windowsTitle = _getWindowsTitle(contentsString);
             if (!windowsTitle) return;
             const grubRebootSh = [
                 'pkexec', 'sh',
@@ -183,69 +183,19 @@ export default class Reboot2WinExtension extends Extension {
 }
 
 function _getWindowsTitle(grubConfig) {
-    // 将输入字符串按行分割
     const lines = grubConfig.split('\n');
 
-    // 查找包含 'windows' 的行（不区分大小写）
     const windowsLine = lines.find(line =>
         line.toLowerCase().includes('windows')
     );
 
     if (!windowsLine) {
-        return null; // 如果没有找到包含 'windows' 的行，返回 null
+        return null; 
     }
-
-    // 使用正则表达式提取单引号中的内容
     const match = windowsLine.match(/'([^']+)'/);
-
-    // 如果找到匹配，返回第一个捕获组（单引号中的内容）
-    // 否则返回 null
     return match ? match[1] : null;
 }
 
-/**
- * Execute a command asynchronously and return the output from `stdout` on
- * success or throw an error with output from `stderr` on failure.
- *
- * If given, @input will be passed to `stdin` and @cancellable can be used to
- * stop the process before it finishes.
- *
- * @param {string[]} argv - a list of string arguments
- * @param {string} [input] - Input to write to `stdin` or %null to ignore
- * @param {Gio.Cancellable} [cancellable] - optional cancellable object
- * @returns {Promise<string>} - The process output
- */
-async function execCommunicate(argv, input = null, cancellable = null) {
-    let cancelId = 0;
-    let flags = Gio.SubprocessFlags.STDOUT_PIPE |
-        Gio.SubprocessFlags.STDERR_PIPE;
-
-    if (input !== null)
-        flags |= Gio.SubprocessFlags.STDIN_PIPE;
-
-    const proc = new Gio.Subprocess({ argv, flags });
-    proc.init(cancellable);
-
-    if (cancellable instanceof Gio.Cancellable)
-        cancelId = cancellable.connect(() => proc.force_exit());
-
-    try {
-        const [ok, stdout, stderr] = await proc.communicate_utf8(input, null);
-
-        if (!ok) {
-            console.log(`Command '${argv}' failed with stderr ${stderr}`);
-            throw new Gio.IOErrorEnum({
-                code: Gio.IOErrorEnum.FAILED,
-                message: stderr ? stderr.trim() : `Command '${argv}' failed with stderr ${stderr}`,
-            });
-        }
-
-        return stdout.trim();
-    } finally {
-        if (cancelId > 0)
-            cancellable.disconnect(cancelId);
-    }
-}
 
 
 /**
