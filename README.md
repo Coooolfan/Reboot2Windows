@@ -25,7 +25,9 @@ Gnome可能默认关闭了所有扩展，请在你的程序库中找到`扩展`�
 
 > [!NOTE]
 >
-> 此插件已提交到Gnome官方扩展商店审核～
+> Now you can install this plugin directly from the Gnome Extensions website. Visit the [plugin page on Gnome Extensions](https://extensions.gnome.org/extension/7385/reboot2windows/), and click the `On` button to install it.
+>
+> 现在，您可以直接从Gnome Extensions网站上安装此插件。请访问[Gnome Extensions 上的本插件页面](https://extensions.gnome.org/extension/7385/reboot2windows/)，点击`On`按钮即可安装。
 
 ### Download / 下载插件
 
